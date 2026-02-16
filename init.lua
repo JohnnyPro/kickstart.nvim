@@ -238,6 +238,9 @@ vim.api.nvim_create_autocmd('BufEnter', {
   end,
 })
 
+-- Table to store timers per buffer
+local autosave_timers = {}
+
 vim.api.nvim_create_autocmd({ 'TextChanged', 'TextChangedI' }, {
   pattern = '*',
   callback = function()
@@ -260,9 +263,32 @@ vim.api.nvim_create_autocmd({ 'TextChanged', 'TextChangedI' }, {
       end
     end
 
-    if not should_exclude and vim.bo.modifiable and vim.bo.filetype ~= '' and vim.bo.buftype == '' then
-      vim.cmd 'silent! write'
+    if should_exclude or not vim.bo.modifiable or vim.bo.filetype == '' or vim.bo.buftype ~= '' then
+      return
     end
+
+    -- Cancel any existing timer for this buffer
+    if autosave_timers[bufnr] then
+      autosave_timers[bufnr]:stop()
+      autosave_timers[bufnr]:close()
+    end
+
+    -- Start a new timer
+    local timer = vim.loop.new_timer()
+    timer:start(
+      5000,
+      0,
+      vim.schedule_wrap(function()
+        if vim.api.nvim_buf_is_valid(bufnr) and vim.bo[bufnr].modifiable then
+          vim.api.nvim_buf_call(bufnr, function()
+            vim.cmd 'silent! write'
+          end)
+        end
+      end)
+    )
+
+    -- Store the timer so we can cancel if needed
+    autosave_timers[bufnr] = timer
   end,
 })
 vim.opt.undofile = true
