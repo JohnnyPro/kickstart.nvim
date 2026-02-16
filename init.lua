@@ -1,3 +1,6 @@
+require 'custom.options.keymaps'
+require 'custom.options.options'
+
 --[[
 
 =====================================================================
@@ -327,7 +330,6 @@ require('lazy').setup({
   { -- Fuzzy Finder (files, lsp, etc)
     'nvim-telescope/telescope.nvim',
     -- By default, Telescope is included and acts as your picker for everything.
-
     -- If you would like to switch to a different picker (like snacks, or fzf-lua)
     -- you can disable the Telescope plugin by setting enabled to false and enable
     -- your replacement picker by requiring it explicitly (e.g. 'custom.plugins.snacks')
