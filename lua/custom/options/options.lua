@@ -35,6 +35,9 @@ local options = {
   wrap = true,
   linebreak = true,
   breakindent = true,
+  shell = 'pwsh',
+  shellcmdflag = '-NoLogo -NoProfile -ExecutionPolicy RemoteSigned -Command',
+  shellquote = '',
 }
 
 vim.opt.shortmess:append 'c'

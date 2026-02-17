@@ -1,5 +1,6 @@
 require 'custom.options.keymaps'
 require 'custom.options.options'
+require 'custom.options.globals'
 
 --[[
 
@@ -94,7 +95,7 @@ vim.g.mapleader = ' '
 vim.g.maplocalleader = ' '
 
 -- Set to true if you have a Nerd Font installed and selected in the terminal
-vim.g.have_nerd_font = false
+-- vim.g.have_nerd_font = false
 
 -- [[ Setting options ]]
 -- See `:help vim.o`
@@ -483,6 +484,8 @@ require('lazy').setup({
       -- Mason must be loaded before its dependents so we need to set it up here.
       -- NOTE: `opts = {}` is the same as calling `require('mason').setup({})`
       { 'mason-org/mason.nvim', opts = {} },
+      -- This plugin streamlines Neovim's LSP setup by automating server installation and activation, providing helpful management commands, and mapping mason.nvim packages to nvim-lspconfig configurations.
+      { 'mason-org/mason-lspconfig.nvim', opts = {} },
       'WhoIsSethDaniel/mason-tool-installer.nvim',
 
       -- Useful status updates for LSP.
@@ -597,14 +600,20 @@ require('lazy').setup({
       local servers = {
         -- clangd = {},
         -- gopls = {},
-        -- pyright = {},
+        pyright = {},
+
         -- rust_analyzer = {},
         --
         -- Some languages (like typescript) have entire language plugins that can be useful:
         --    https://github.com/pmizio/typescript-tools.nvim
         --
         -- But for many setups, the LSP (`ts_ls`) will work just fine
-        -- ts_ls = {},
+        -- typescript-language-server = {
+        --   on_attach = function(client) client.server_capabilities.documentFormattingProvider = false end,
+        -- },
+        ts_ls = {
+          on_attach = function(client) client.server_capabilities.documentFormattingProvider = false end,
+        },
       }
 
       -- Ensure the servers and tools above are installed
@@ -621,7 +630,15 @@ require('lazy').setup({
         -- You can add other tools here that you want Mason to install
       })
 
-      require('mason-tool-installer').setup { ensure_installed = ensure_installed }
+      -- local handlers = {
+      --   function(server_name)
+      --     if server_name == 'tsserver' then server_name = 'ts_ls' end
+      --   end,
+      -- }
+      require('mason-tool-installer').setup {
+        ensure_installed = ensure_installed,
+        -- handlers = handlers,
+      }
 
       for name, server in pairs(servers) do
         server.capabilities = vim.tbl_deep_extend('force', {}, capabilities, server.capabilities or {})
