@@ -137,6 +137,7 @@ return {
       ts_ls = {
         on_attach = function(client) client.server_capabilities.documentFormattingProvider = false end,
       },
+      csharp_ls = {},
     }
 
     -- Ensure the servers and tools above are installed
