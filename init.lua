@@ -380,18 +380,35 @@ require('lazy').setup({
 
       -- [[ Configure Telescope ]]
       -- See `:help telescope` and `:help telescope.setup()`
-      require('telescope').setup {
-        -- You can put your default mappings / updates / etc. in here
-        --  All the info you're looking for is in `:help telescope.setup()`
-        --
-        -- defaults = {
-        --   mappings = {
-        --     i = { ['<c-enter>'] = 'to_fuzzy_refine' },
-        --   },
-        -- },
-        -- pickers = {}
+      local telescope = require 'telescope'
+      local actions = require 'telescope.actions'
+
+      -- Windows detection
+      local is_windows = vim.fn.has 'win64' == 1 or vim.fn.has 'win32' == 1
+      local original_fnameescape = vim.fn.fnameescape
+
+      local winfnameescape = function(path)
+        local escaped_path = original_fnameescape(path)
+        if is_windows then escaped_path = escaped_path:gsub('\\([%(%)%^&;])', '\\\\%1') end
+        return escaped_path
+      end
+
+      local select_default = function(prompt_bufnr)
+        vim.fn.fnameescape = winfnameescape
+        local result = actions.select_default(prompt_bufnr)
+        vim.fn.fnameescape = original_fnameescape
+        return result
+      end
+
+      telescope.setup {
+        defaults = {
+          mappings = {
+            i = { ['<CR>'] = select_default },
+            n = { ['<CR>'] = select_default },
+          },
+        },
         extensions = {
-          ['ui-select'] = { require('telescope.themes').get_dropdown() },
+          ['ui-select'] = require('telescope.themes').get_dropdown(),
         },
       }
 
